@@ -1,0 +1,12 @@
+package com.bysellens.product;
+import java.util.*;import java.math.BigDecimal;import jakarta.validation.Valid;import jakarta.validation.constraints.*;import org.springframework.web.bind.annotation.*;import org.springframework.web.multipart.MultipartFile;import org.springframework.http.*;import org.springframework.core.io.Resource;
+@RestController public class ProductController {
+ public record Input(@NotBlank @Size(max=80) String codigo,@NotBlank @Size(max=120) String nombre,@NotNull @Size(max=2000) String descripcion,@NotBlank @Size(max=120) String categoria,@NotNull @Size(max=120) String tono,@NotNull @DecimalMin("0") @Digits(integer=12,fraction=2) BigDecimal precioCompra,@NotNull @DecimalMin("0") @Digits(integer=12,fraction=2) BigDecimal precioVenta,@NotNull @Min(0) Integer stock,@NotNull @Min(0) Integer stockMinimo,@NotNull Boolean activo){}
+ private final ProductService service;private final Images images;public ProductController(ProductService s,Images images){service=s;this.images=images;}
+ @GetMapping("/api/productos") public List<ProductService.View> list(){return service.list();}
+ @GetMapping({"/api/productos/{id}","/internal/productos/{id}"}) public ProductService.View get(@PathVariable long id){return service.get(id);}
+ @PostMapping(value="/api/productos",consumes=MediaType.MULTIPART_FORM_DATA_VALUE) @ResponseStatus(HttpStatus.CREATED) public ProductService.View create(@Valid @RequestPart("producto")Input input,@RequestPart(value="imagen",required=false)MultipartFile image){return service.save(null,input,image);}
+ @PutMapping(value="/api/productos/{id}",consumes=MediaType.MULTIPART_FORM_DATA_VALUE) public ProductService.View update(@PathVariable long id,@Valid @RequestPart("producto")Input input,@RequestPart(value="imagen",required=false)MultipartFile image){return service.save(id,input,image);}
+ @DeleteMapping("/api/productos/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void delete(@PathVariable long id){service.delete(id);}
+ @GetMapping("/uploads/productos/{name}") public ResponseEntity<Resource> image(@PathVariable String name){var resource=images.get(name);return ResponseEntity.ok().contentType(name.endsWith("png")?MediaType.IMAGE_PNG:MediaType.IMAGE_JPEG).header("X-Content-Type-Options","nosniff").body(resource);}
+}
