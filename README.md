@@ -1,9 +1,17 @@
-# bysellens-product-api
+# BySellens Customer Service
 
-> product bounded context: service API
+Independent Spring Boot API for the BySellens Customer bounded context.
 
 Part of the **LMS Library** distributed system — team `lms-library`, Grupo 2.
 Governance and documentation live in [`library-docs`](https://github.com/code-corhuila/library-docs).
+
+## Build and test
+
+Requires Java 21 and Maven. Run `mvn test` from the repository root.
+
+The service reads database credentials from `DB_URL`, `DB_USER`, and `DB_PASSWORD`.
+Set `JWT_SECRET` to a secret of at least 32 bytes before starting the application.
+The PostgreSQL schema is managed by Flyway.
 
 ## Branching
 
