@@ -1,0 +1,7 @@
+package com.bysellens.product;
+import org.junit.jupiter.api.*;import org.junit.jupiter.api.io.TempDir;import static org.junit.jupiter.api.Assertions.*;import static org.mockito.Mockito.*;import java.nio.file.Path;import java.math.BigDecimal;import java.awt.image.BufferedImage;import java.io.ByteArrayOutputStream;import javax.imageio.ImageIO;import org.springframework.mock.web.MockMultipartFile;import com.bysellens.common.*;
+class ProductTest {
+ @TempDir Path directory;
+ @Test void imageValidationAndPersistence()throws Exception{var images=new Images(directory.toString());assertThrows(DomainException.class,()->images.save(new MockMultipartFile("imagen","fake.png","image/png","<script>bad</script>".getBytes())));var bytes=new ByteArrayOutputStream();ImageIO.write(new BufferedImage(2,2,BufferedImage.TYPE_INT_RGB),"png",bytes);String name=images.save(new MockMultipartFile("imagen","valid.png","image/png",bytes.toByteArray()));assertTrue(images.get(name).exists());assertThrows(DomainException.class,()->images.get("../escape.png"));}
+ @Test void invalidPricesDoNotModifyData(){var repo=mock(ProductoRepository.class);var remote=mock(Remote.class);var images=mock(Images.class);var service=new ProductService(repo,remote,images,"inventory");var input=new ProductController.Input("SKU","Labial","Prueba","Labios","Rosa",new BigDecimal("10"),new BigDecimal("9"),1,0,true);assertEquals(400,assertThrows(DomainException.class,()->service.save(null,input,null)).status);verifyNoInteractions(repo,remote,images);}
+}
